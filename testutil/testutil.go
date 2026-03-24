@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"runtime/debug"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -20,9 +21,9 @@ import (
 
 // TestingT is a subset of the functionality provided by testing.T.
 type TestingT interface {
-	Logf(string, ...interface{})
-	Skipf(string, ...interface{})
-	Errorf(string, ...interface{})
+	Logf(string, ...any)
+	Skipf(string, ...any)
+	Errorf(string, ...any)
 	FailNow()
 }
 
@@ -163,12 +164,7 @@ func DoTestCaseFile(m goldmark.Markdown, filename string, t TestingT, no ...int)
 		}
 		shouldAdd := len(no) == 0
 		if !shouldAdd {
-			for _, n := range no {
-				if n == c.No {
-					shouldAdd = true
-					break
-				}
-			}
+			shouldAdd = slices.Contains(no, c.No)
 		}
 		if shouldAdd {
 			cases = append(cases, c)
@@ -325,9 +321,9 @@ func DiffPretty(v1, v2 []byte) []byte {
 		}
 		for _, line := range diff.Lines {
 			if c != " " {
-				b.WriteString(fmt.Sprintf("%s | %s\n", c, util.VisualizeSpaces(line)))
+				fmt.Fprintf(&b, "%s | %s\n", c, util.VisualizeSpaces(line))
 			} else {
-				b.WriteString(fmt.Sprintf("%s | %s\n", c, line))
+				fmt.Fprintf(&b, "%s | %s\n", c, line)
 			}
 		}
 	}

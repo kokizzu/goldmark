@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"runtime/pprof"
 	"strconv"
 	"time"
 
@@ -20,6 +22,18 @@ func main() {
 	}
 	if len(os.Args) > 2 {
 		file = os.Args[2]
+	}
+	if len(os.Args) > 3 {
+		f, err := os.Create(os.Args[3])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal(err)
+		}
+		defer pprof.StopCPUProfile()
 	}
 	source, err := ioutil.ReadFile(file)
 	if err != nil {

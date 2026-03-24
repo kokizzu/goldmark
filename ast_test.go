@@ -6,6 +6,7 @@ import (
 
 	. "github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/testutil"
 	"github.com/yuin/goldmark/text"
 )
@@ -290,5 +291,46 @@ func TestHasBlankPreviousLines(t *testing.T) {
 				t.Errorf("expected %v, got %v", cs.Expected, !cs.Expected)
 			}
 		})
+	}
+}
+
+func TestInlinePos(t *testing.T) {
+	markdown := New()
+
+	source := []byte(`[bar][]
+
+[foo][bar]
+
+[bar]
+
+[foo](http://example.com)
+
+aaaa **b** 
+
+![aaa](http://example.com/foo.png "title")
+
+[bar]: 
+  /url "ti
+  tle"
+`)
+	c := parser.NewContext()
+	n := markdown.Parser().Parse(text.NewReader(source), parser.WithContext(c))
+	if 0 != n.FirstChild().FirstChild().Pos() {
+		t.Error("unexpected position for 1st link reference")
+	}
+	if 9 != n.FirstChild().NextSibling().FirstChild().Pos() {
+		t.Error("unexpected position for 2nd link reference")
+	}
+	if 21 != n.FirstChild().NextSibling().NextSibling().FirstChild().Pos() {
+		t.Error("unexpected position for 3rd link reference")
+	}
+	if 28 != n.FirstChild().NextSibling().NextSibling().NextSibling().FirstChild().Pos() {
+		t.Error("unexpected position for 1st inline link ")
+	}
+	if 60 != n.FirstChild().NextSibling().NextSibling().NextSibling().NextSibling().FirstChild().NextSibling().Pos() {
+		t.Error("unexpected position for 1st emphasis")
+	}
+	if 68 != n.FirstChild().NextSibling().NextSibling().NextSibling().NextSibling().NextSibling().FirstChild().Pos() {
+		t.Error("unexpected position for 1st image")
 	}
 }

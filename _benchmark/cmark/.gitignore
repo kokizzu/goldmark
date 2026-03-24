@@ -1,2 +1,5 @@
 cmark-master
 cmark_benchmark
+main
+cpu.prof
+out.png

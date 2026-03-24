@@ -20,6 +20,14 @@ run: $(CMARK_BIN)
 $(CMARK_BIN): ./cmark-master/Makefile cmark_benchmark.c
 	gcc -I./cmark-master/build/src -I./cmark-master/src  cmark_benchmark.c -o $(CMARK_BIN) -L./cmark-master/build/src -lcmark; \
 
+.PHONY: profile
+profile:
+	go build -o main ./goldmark_benchmark.go
+	./main 1000 _data.md cpu.prof
+	go tool pprof -png main cpu.prof > out.png
+	rm -f main cpu.prof
+
+
 .PHONY: clean
 clean:
 	rm -f $(CMARK_BIN)
