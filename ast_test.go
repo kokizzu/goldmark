@@ -6,6 +6,7 @@ import (
 
 	. "github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/testutil"
 	"github.com/yuin/goldmark/text"
@@ -333,4 +334,17 @@ aaaa **b**
 	if 68 != n.FirstChild().NextSibling().NextSibling().NextSibling().NextSibling().NextSibling().FirstChild().Pos() {
 		t.Error("unexpected position for 1st image")
 	}
+}
+
+func TestBlockPos(t *testing.T) {
+	markdown := New(
+		WithExtensions(extension.GFM, extension.Footnote, extension.DefinitionList),
+	)
+
+	source := []byte(`
+- [ ] hoge
+`)
+	c := parser.NewContext()
+	n := markdown.Parser().Parse(text.NewReader(source), parser.WithContext(c))
+	n.Dump(source, 0)
 }
